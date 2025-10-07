@@ -6,11 +6,9 @@ const requestRoutes = require('./routes/requests');
 const paymentRoutes = require('./routes/payments');
 
 const app = express();
-const port = process.env.PORT || 10000;
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Server running on port ${PORT}`);
-});
 
+// Define PORT - use either uppercase or lowercase consistently
+const PORT = process.env.PORT || 10000;
 
 // Enhanced CORS configuration
 const corsOptions = {
@@ -38,26 +36,18 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json({ limit: '10mb' })); // Increase payload limit for file uploads
 
-// Enable CORS for your Vercel frontend
-app.use(cors({
-  origin: [
-    'https://assignly5.vercel.app', // Your Vercel URL
-    'http://localhost:3000' // For local development
-  ],
-  credentials: true
-}));
 // Routes
 app.use('/api/requests', requestRoutes);
 app.use('/api/payments', paymentRoutes);
 
 // Health check endpoint
-// In your main server file (app.js or index.js)
 app.get('/', (req, res) => {
   res.json({ 
     message: 'Backend server is running!',
     timestamp: new Date().toISOString()
   });
 });
+
 app.get('/api/test', (req, res) => {
   res.json({ message: 'API is working!' });
 });
@@ -81,7 +71,8 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Internal server error' });
 });
 
-app.listen(PORT, () => {
+// ONLY ONE app.listen CALL - at the very end
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server is running on port ${PORT}`);
-  console.log(`Health check: http://localhost:${PORT}/api/health`);
+  console.log(`Health check: http://localhost:${PORT}/`);
 });
