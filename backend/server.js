@@ -5,6 +5,12 @@ require('dotenv').config();
 const requestRoutes = require('./routes/requests');
 const paymentRoutes = require('./routes/payments');
 
+const express = require('express');
+const app = express();
+
+const dbTestRoute = require('./routes/dbTest'); // Adjust path if needed
+app.use('/', dbTestRoute);
+
 const app = express();
 const PORT = process.env.PORT || 10000;
 
