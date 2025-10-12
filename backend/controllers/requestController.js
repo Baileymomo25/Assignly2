@@ -5,11 +5,24 @@ const submitRequest = async (req, res) => {
   try {
     console.log('Request received:', req.body);
     
-    const requestData = req.body;
-    
+    const {
+      fullName,
+      email,
+      phone,
+      workType,
+      deadline,
+      notes,
+      files,
+      pageCount,
+      diagramCount,
+      deliveryType,
+      totalPrice,
+      priceBreakdown
+    } = req.body;
+
     // Validate required fields
-    const requiredFields = ['fullName', 'email', 'workType', 'deadline'];
-    const missingFields = requiredFields.filter(field => !requestData[field]);
+    const requiredFields = ['fullName', 'email', 'workType', 'deadline', 'pageCount', 'totalPrice'];
+    const missingFields = requiredFields.filter(field => !req.body[field]);
     
     if (missingFields.length > 0) {
       return res.status(400).json({ 
@@ -20,13 +33,28 @@ const submitRequest = async (req, res) => {
 
     // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(requestData.email)) {
+    if (!emailRegex.test(email)) {
       return res.status(400).json({ 
         error: 'Invalid email format'
       });
     }
 
     // Create request in database
+    const requestData = {
+      fullName,
+      email,
+      phone,
+      workType,
+      deadline,
+      notes,
+      files,
+      pageCount,
+      diagramCount,
+      deliveryType,
+      totalPrice,
+      priceBreakdown
+    };
+
     const newRequest = await createRequest(requestData);
     
     // Send notification emails (non-blocking)
