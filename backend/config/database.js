@@ -11,31 +11,37 @@ const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
   // Add connection timeout
-  connectionTimeoutMillis: 5000,
+  connectionTimeoutMillis: 10000, // Increased timeout
   idleTimeoutMillis: 30000,
   max: 20
 });
 
-// Test the connection
+// Test the connection (but don't crash if it fails initially)
 pool.on('connect', (client) => {
   console.log('Database connected successfully');
 });
 
 pool.on('error', (err, client) => {
-  console.error('Unexpected database error:', err);
-  process.exit(-1);
+  console.error('Unexpected database error:', err.message);
+  // Don't exit process on error, let the server continue
 });
 
-// Verify connection on startup
-(async () => {
+// Verify connection on startup (non-blocking)
+const testConnection = async () => {
   try {
     const client = await pool.connect();
-    console.log('Database connection verified');
+    console.log('✅ Database connection verified');
     client.release();
+    return true;
   } catch (error) {
-    console.error('Database connection failed:', error);
-    process.exit(1);
+    console.error('❌ Database connection failed:', error.message);
+    console.log('Server will continue running, but database features may not work');
+    return false;
   }
-})();
+};
 
-module.exports = pool;
+// Export both pool and test function
+module.exports = {
+  pool,
+  testConnection
+};
