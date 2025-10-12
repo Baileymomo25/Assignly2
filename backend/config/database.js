@@ -7,26 +7,17 @@ if (!process.env.DATABASE_URL) {
   process.exit(1);
 }
 
-// Parse the database URL to add SSL parameters
-let connectionString = process.env.DATABASE_URL;
+// Parse the database URL and force SSL
+const connectionString = process.env.DATABASE_URL;
 
-// Add SSL parameters to the connection string
-if (process.env.NODE_ENV === 'production') {
-  if (connectionString.includes('?')) {
-    connectionString += '&sslmode=require';
-  } else {
-    connectionString += '?sslmode=require';
-  }
-}
-
-console.log('Database URL:', connectionString.replace(/:[^:]*@/, ':****@')); // Hide password in logs
-
+// For Render PostgreSQL, we need to ensure SSL is properly configured
 const pool = new Pool({
   connectionString: connectionString,
-  ssl: process.env.NODE_ENV === 'production' ? { 
-    rejectUnauthorized: false 
-  } : false,
-  connectionTimeoutMillis: 10000,
+  ssl: {
+    rejectUnauthorized: false,
+    require: true
+  },
+  connectionTimeoutMillis: 15000,
   idleTimeoutMillis: 30000,
   max: 20
 });
@@ -42,14 +33,31 @@ pool.on('error', (err, client) => {
 
 // Verify connection on startup (non-blocking)
 const testConnection = async () => {
+  let client;
   try {
-    const client = await pool.connect();
+    client = await pool.connect();
     console.log('✅ Database connection verified');
+    
+    // Test a simple query
+    const result = await client.query('SELECT NOW()');
+    console.log('✅ Database query test successful:', result.rows[0]);
+    
     client.release();
     return true;
   } catch (error) {
     console.error('❌ Database connection failed:', error.message);
+    
+    // More detailed error information
+    if (error.code === '28000') {
+      console.log('🔧 SSL/TLS connection required. Check database SSL settings.');
+    }
+    
     console.log('Server will continue running, but database features may not work');
+    
+    // Make sure to release client if it was acquired
+    if (client) {
+      client.release();
+    }
     return false;
   }
 };
