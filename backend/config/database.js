@@ -7,11 +7,26 @@ if (!process.env.DATABASE_URL) {
   process.exit(1);
 }
 
+// Parse the database URL to add SSL parameters
+let connectionString = process.env.DATABASE_URL;
+
+// Add SSL parameters to the connection string
+if (process.env.NODE_ENV === 'production') {
+  if (connectionString.includes('?')) {
+    connectionString += '&sslmode=require';
+  } else {
+    connectionString += '?sslmode=require';
+  }
+}
+
+console.log('Database URL:', connectionString.replace(/:[^:]*@/, ':****@')); // Hide password in logs
+
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
-  // Add connection timeout
-  connectionTimeoutMillis: 10000, // Increased timeout
+  connectionString: connectionString,
+  ssl: process.env.NODE_ENV === 'production' ? { 
+    rejectUnauthorized: false 
+  } : false,
+  connectionTimeoutMillis: 10000,
   idleTimeoutMillis: 30000,
   max: 20
 });
@@ -23,7 +38,6 @@ pool.on('connect', (client) => {
 
 pool.on('error', (err, client) => {
   console.error('Unexpected database error:', err.message);
-  // Don't exit process on error, let the server continue
 });
 
 // Verify connection on startup (non-blocking)
