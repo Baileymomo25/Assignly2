@@ -4,12 +4,7 @@ require('dotenv').config();
 
 const requestRoutes = require('./routes/requests');
 const paymentRoutes = require('./routes/payments');
-
-const express = require('express');
-const app = express();
-
 const dbTestRoute = require('./routes/dbTest'); // Adjust path if needed
-app.use('/', dbTestRoute);
 
 const app = express();
 const PORT = process.env.PORT || 10000;
@@ -29,31 +24,25 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 
 // Routes
-// Add this route before your other routes
-app.get('/api/health', (req, res) => {
-  res.status(200).json({ 
-    status: 'OK', 
-    message: 'Server is running',
-    timestamp: new Date().toISOString()
-  });
-});
+app.use('/', dbTestRoute);
 app.use('/api/requests', requestRoutes);
 app.use('/api/payments', paymentRoutes);
 
 // Health check endpoint
-// Health check endpoint
 app.get('/api/health', (req, res) => {
   res.status(200).json({ 
     status: 'OK', 
     message: 'Server is running',
     timestamp: new Date().toISOString()
   });
+});
 
+// Test endpoint for debugging
 app.get('/api/test', (req, res) => {
   res.json({ message: 'API is working!' });
 });
 
-// Test endpoint for debugging
+// Debug endpoint
 app.post('/api/debug', (req, res) => {
   console.log('Debug request received:', req.body);
   res.json({ 
