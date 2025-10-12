@@ -4,7 +4,6 @@ require('dotenv').config();
 
 const requestRoutes = require('./routes/requests');
 const paymentRoutes = require('./routes/payments');
-const dbTestRoute = require('./routes/dbTest'); // Adjust path if needed
 
 const app = express();
 const PORT = process.env.PORT || 10000;
@@ -24,7 +23,6 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 
 // Routes
-app.use('/', dbTestRoute);
 app.use('/api/requests', requestRoutes);
 app.use('/api/payments', paymentRoutes);
 
