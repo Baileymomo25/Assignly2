@@ -4,6 +4,7 @@ require('dotenv').config();
 
 const requestRoutes = require('./routes/requests');
 const paymentRoutes = require('./routes/payments');
+const { testConnection } = require('./config/database'); // Import test function
 
 const app = express();
 const PORT = process.env.PORT || 10000;
@@ -22,15 +23,26 @@ app.use(cors({
 
 app.use(express.json({ limit: '10mb' }));
 
+// Test database connection (non-blocking)
+testConnection().then(success => {
+  if (success) {
+    console.log('✅ Database is ready');
+  } else {
+    console.log('⚠️ Database not available, but server is running');
+  }
+});
+
 // Routes
 app.use('/api/requests', requestRoutes);
 app.use('/api/payments', paymentRoutes);
 
 // Health check endpoint
-app.get('/api/health', (req, res) => {
+app.get('/api/health', async (req, res) => {
+  const dbStatus = await testConnection();
   res.status(200).json({ 
     status: 'OK', 
     message: 'Server is running',
+    database: dbStatus ? 'connected' : 'disconnected',
     timestamp: new Date().toISOString()
   });
 });
@@ -58,5 +70,5 @@ app.use((err, req, res, next) => {
 
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server is running on port ${PORT}`);
-  console.log(`Frontend should connect to: https://assignly2.onrender.com`);
+  console.log(`Health check: https://assignly2.onrender.com/api/health`);
 });
