@@ -21,8 +21,20 @@ const sendNewRequestEmail = async (requestData) => {
       <p><strong>Email:</strong> ${requestData.email}</p>
       <p><strong>Phone:</strong> ${requestData.phone}</p>
       <p><strong>Work Type:</strong> ${requestData.work_type}</p>
+      <p><strong>Pages:</strong> ${requestData.page_count}</p>
+      <p><strong>Diagrams:</strong> ${requestData.diagram_count || 0}</p>
+      <p><strong>Delivery Type:</strong> ${requestData.delivery_type}</p>
       <p><strong>Deadline:</strong> ${new Date(requestData.deadline).toLocaleDateString()}</p>
+      <p><strong>Total Price:</strong> ₦${(requestData.total_price / 100).toLocaleString()}</p>
       <p><strong>Notes:</strong> ${requestData.notes || 'None'}</p>
+      
+      <h3>Price Breakdown:</h3>
+      <ul>
+        ${requestData.price_breakdown ? JSON.parse(requestData.price_breakdown).map(item => 
+          `<li>${item.item}: ₦${item.amount.toLocaleString()}</li>`
+        ).join('') : '<li>No breakdown available</li>'}
+      </ul>
+      
       <br>
       <p>Login to the admin panel to view more details.</p>
     `,
@@ -47,8 +59,19 @@ const sendConfirmationEmail = async (requestData) => {
       
       <h3>Request Details:</h3>
       <p><strong>Work Type:</strong> ${requestData.work_type}</p>
+      <p><strong>Pages:</strong> ${requestData.page_count}</p>
+      <p><strong>Diagrams:</strong> ${requestData.diagram_count || 0}</p>
+      <p><strong>Delivery Type:</strong> ${requestData.delivery_type}</p>
       <p><strong>Deadline:</strong> ${new Date(requestData.deadline).toLocaleDateString()}</p>
+      <p><strong>Total Amount:</strong> ₦${(requestData.total_price / 100).toLocaleString()}</p>
       <p><strong>Notes:</strong> ${requestData.notes || 'None provided'}</p>
+      
+      <h3>Price Breakdown:</h3>
+      <ul>
+        ${requestData.price_breakdown ? JSON.parse(requestData.price_breakdown).map(item => 
+          `<li>${item.item}: ₦${item.amount.toLocaleString()}</li>`
+        ).join('') : '<li>No breakdown available</li>'}
+      </ul>
       
       <p>We'll contact you within 24 hours to discuss your requirements in detail.</p>
       
