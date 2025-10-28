@@ -10,13 +10,14 @@ if (!process.env.DATABASE_URL) {
 // Parse the database URL and force SSL
 const connectionString = process.env.DATABASE_URL;
 
-// For Render PostgreSQL, we need to ensure SSL is properly configured
+// If using pg (node-postgres)
+const { Pool } = require('pg');
+
 const pool = new Pool({
-  connectionString: connectionString,
+  connectionString: process.env.DATABASE_URL,
   ssl: {
-    rejectUnauthorized: false,
-    require: true
-  },
+    rejectUnauthorized: false
+  }
   connectionTimeoutMillis: 15000,
   idleTimeoutMillis: 30000,
   max: 20
