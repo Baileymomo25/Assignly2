@@ -10,15 +10,9 @@ const app = express();
 const PORT = process.env.PORT || 10000;
 
 // Configure CORS
+// Configure CORS - Allow all origins for mobile app
 app.use(cors({
-  origin: [
-    'https://assignly5.vercel.app',
-    'http://localhost:5173',
-    'http://localhost:3000',
-    'capacitor://localhost',  // Add this for Capacitor Android
-    'http://localhost',       // Add this too
-    'ionic://localhost'       // And this if using Ionic
-  ],
+  origin: '*',  // This allows requests from your Android app
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization']
